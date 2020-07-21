@@ -12,38 +12,19 @@ use Pagerfanta\Adapter\AdapterInterface;
  */
 class ElasticaAdapter implements AdapterInterface
 {
-    /**
-     * @var SearchableInterface
-     */
-    private $searchable;
-
-    /**
-     * @var Query
-     */
-    private $query;
-
-    /**
-     * @var array
-     */
-    private $options;
+    private SearchableInterface $searchable;
+    private Query $query;
+    private array $options;
 
     /**
      * Used to limit the number of totalHits returned by ElasticSearch.
      * For more information, see: https://github.com/whiteoctober/Pagerfanta/pull/213#issue-87631892.
-     *
-     * @var int|null
      */
-    private $maxResults;
+    private ?int $maxResults;
 
-    /**
-     * @var ResultSet|null
-     */
-    private $resultSet;
+    private ?ResultSet $resultSet = null;
 
-    /**
-     * @param int|null $maxResults
-     */
-    public function __construct(SearchableInterface $searchable, Query $query, array $options = [], $maxResults = null)
+    public function __construct(SearchableInterface $searchable, Query $query, array $options = [], ?int $maxResults = null)
     {
         $this->searchable = $searchable;
         $this->query = $query;
@@ -55,18 +36,13 @@ class ElasticaAdapter implements AdapterInterface
      * Returns the Elastica ResultSet.
      *
      * Will return null if getSlice has not yet been called.
-     *
-     * @return ResultSet|null
      */
-    public function getResultSet()
+    public function getResultSet(): ?ResultSet
     {
         return $this->resultSet;
     }
 
-    /**
-     * @return int
-     */
-    public function getNbResults()
+    public function getNbResults(): int
     {
         if (!$this->resultSet) {
             $totalHits = $this->searchable->count($this->query);
@@ -81,13 +57,7 @@ class ElasticaAdapter implements AdapterInterface
         return min($totalHits, $this->maxResults);
     }
 
-    /**
-     * @param int $offset
-     * @param int $length
-     *
-     * @return iterable
-     */
-    public function getSlice($offset, $length)
+    public function getSlice(int $offset, int $length): iterable
     {
         return $this->resultSet = $this->searchable->search(
             $this->query,
